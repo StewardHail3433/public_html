@@ -9,6 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" media="all" href="styles.css">
     <link rel="stylesheet" type="text/css" href="tswnavbar.css" />
+    <link rel="stylesheet" type="text/css" href="wordle.css" />
 </head>
 
 <body>
@@ -31,8 +32,30 @@
                     </p>
                     <button class="collapsible">Pong</button>
                     <div class="content">
+                        <p>
+                            This is pong. I think there are a lot of bugs but IDK
+                            <br>
+                            Left - wasdW
+                            <br>
+                            Right - Arrow Keys
+                        </p>
                         <canvas id="pong"></canvas>
                         <script type="module" src="scripts/pong/main.js"> </script>
+                    </div>
+
+                    <button class="collapsible">Wordle</button>
+                    <div class="content worlde" >
+                        <div class="square"></div>
+                        <div class="square"></div>
+                        <div class="square"></div>
+                        <div class="square"></div>
+                        <div class="square"></div>
+                        <script type="module" src="scripts/pong/main.js"> </script>
+                    </div>
+
+                    <button class="collapsible">Cube</button>
+                    <div class="content" id="cube">
+                        <script type="module" src="scripts/cube/main.js"> </script>
                     </div>
                 </center>
                 <p>&nbsp;</p>

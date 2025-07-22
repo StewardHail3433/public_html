@@ -209,7 +209,6 @@ canvas.addEventListener("click", () => {
 document.addEventListener("click", (event) => {
     if (event.target.id != canvas.id) {
         canvas.blur();
-        console.log(event.target, canvas, document.activeElement);
     }
 
 })
@@ -304,7 +303,6 @@ function collisionChecker() {
         let deltaY = ball.getY() - nearestY;
         let distanceSq = (deltaX * deltaX) + (deltaY * deltaY);
 
-        // console.log(i, distance);
         if (distanceSq <= ball.getRadius() * ball.getRadius()) {
             calcNewBallVel(player);
             return;

@@ -1,0 +1,7 @@
+.square {
+    width: 8%;
+    aspect-ratio: 1 / 1;
+    background-color: rgb(94, 94, 114);
+    display: inline-block; /* Makes them sit next to each other */
+    margin-right: 10px; /* Add some spacing */
+  }
