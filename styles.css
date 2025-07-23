@@ -12,6 +12,7 @@ img {
 	width: auto;
 	height: auto;
 	filter: sepia(1);
+	transform: translate3d(1, 0, 0, 213px);
 }
 
 input,
