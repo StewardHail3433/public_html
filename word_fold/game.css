@@ -22,7 +22,7 @@ h1 {
     height: 100%;
     position: relative;
     transform-style: preserve-3d;
-    transform: rotate3d(1, 1, 1, var(--angle));
+    transform: rotate3d(var(--x), var(--y), var(--z), var(--angle));
 }
 
 .cube-face {

@@ -28,47 +28,6 @@ const boards = [
             ["I", "G", "A", "P", "A"]
         ],
         words: ["CHERRY", "PAPAYA", "BANANA", "PEAR", "FIG"]
-    },
-    // New boards
-    {
-        cells: [
-            ["M", "A", "S", "K", "E"],
-            ["T", "A", "C", "S", "O"],
-            ["E", "N", "T", "A", "S", "I"],
-            ["C", "K", "T", "B", "M"],
-            ["H", "S", "L", "I", "N"]
-        ],
-        words: ["MASK", "EAST", "COKE", "SALT", "TACK"]
-    },
-    {
-        cells: [
-            ["V", "O", "L", "I", "R"],
-            ["T", "F", "A", "P", "D"],
-            ["O", "N", "I", "C", "R"],
-            ["V", "O", "L", "T", "I"],
-            ["R", "F", "N", "O", "P"]
-        ],
-        words: ["VOLT", "CORN", "POND", "FIRE", "LIFT"]
-    },
-    {
-        cells: [
-            ["G", "R", "A", "P", "E"],
-            ["B", "S", "M", "O", "N"],
-            ["G", "O", "P", "E", "R"],
-            ["T", "R", "A", "N", "S"],
-            ["P", "S", "L", "A", "C"]
-        ],
-        words: ["GRAPE", "MONS", "PER", "GRASP", "LACE"]
-    },
-    {
-        cells: [
-            ["P", "O", "L", "A", "R"],
-            ["A", "E", "S", "O", "M"],
-            ["R", "I", "O", "P", "H"],
-            ["O", "D", "L", "T", "F"],
-            ["R", "S", "A", "M", "I"]
-        ],
-        words: ["POLAR", "MAST", "FIRE", "TIDE", "SUM"]
     }
 ];
 function make_cell_list() {
@@ -99,6 +58,7 @@ function make_cell_list() {
                 cellBoards.right.push(cells.slice(j * boardData.right.cells.length, j * boardData.right.cells.length + boardData.right.cells.length));
             }
         }
+    console.log(cells[0].parentElement.background)
     }
 
     
@@ -106,14 +66,11 @@ function make_cell_list() {
 }
 
 function showCellData() {
-    console.log(CELLS);
     let faces = Object.keys(boardData);
     for (let i = 0; i < faces.length; i++) {
         let face = faces[i];
-        console.log(face);
         for (let j = 0; j < boardData[face].cells.length; j++) {
             for (let l = 0; l < boardData[face].cells[j].length; l++) {
-                console.log(CELLS[face][j][l]);
                 CELLS[face][j][l].textContent = boardData[face].cells[j][l];
             }
         }
@@ -125,7 +82,6 @@ function select(face, x, y) {
     if (cell.textContent.length > 0) {
         if (selectedCell.x >= 0 && selectedCell.y >= 0 && selectedCell.face != "none") {
             CELLS[selectedCell.face][selectedCell.y][selectedCell.x].classList.remove("selected");
-            console.log("ef")
         }
         cell.classList.add("selected");
         selectedCell.x = x;
@@ -199,11 +155,24 @@ function updateWordHeader() {
     let faces = Object.keys(boardData);
 
     for(let i = 0; i < faces.length; i++) {
-        document.getElementById("words").innerHTML = "<p style='color: '" + CELLS[faces[i]][0][0].parentElement.style.backgroundColor + "'>" + faces[i] + ";>WORDS TO FIND:" + boardData[faces].words.join(", ") + "</p>";
+        const myStylesheet = document.styleSheets[0]; 
+
+        // Get the list of CSS rules
+        const ruleList = myStylesheet.cssRules; 
+
+        // Loop through the rules and find the one for the ".top" class
+        for (const rule of ruleList) {
+            if (rule.selectorText === "." + faces[i]) {
+                // Found the rule, you can now access its properties
+                color = rule.style.cssText.substring(rule.style.cssText.search("rgba"));
+
+            }
+        }
+        document.getElementById("words").innerHTML += "<p style='color: " + color + "'>" + faces[i] + "-- WORDS TO FIND:" + boardData[faces[i]].words.join(", ") + "</p>";
     }
 }
 
-const boardData = {top:boards[Math.floor(Math.random() * 6)], bottom:boards[Math.floor(Math.random() * 6)], left:boards[Math.floor(Math.random() * 3)], right:boards[Math.floor(Math.random() * 3)], front:boards[Math.floor(Math.random() * 3)], back:boards[Math.floor(Math.random() * 3)]};
+const boardData = {top:boards[Math.floor(Math.random() * 3)], bottom:boards[Math.floor(Math.random() * 3)], left:boards[Math.floor(Math.random() * 3)], right:boards[Math.floor(Math.random() * 3)], front:boards[Math.floor(Math.random() * 3)], back:boards[Math.floor(Math.random() * 3)]};
 const CELLS = make_cell_list();
 let selectedCell = {
     x: -1,
@@ -214,12 +183,32 @@ showCellData(boardData);
 console.log(CELLS)
 
 
-// updateWordHeader(boardData);
+updateWordHeader();
 let angle = 0;
+let x = 1;
+let y = 1;
+let z = 1;
+let step = 0.213;
 
 function onFrame() {
-    angle += 0.213;
+    angle += step;
+    document.body.style.setProperty("--x", x);
+    document.body.style.setProperty("--y", y);
+    document.body.style.setProperty("--z", z);
     document.body.style.setProperty("--angle", angle + "deg");
     requestAnimationFrame(onFrame);
 }
 requestAnimationFrame(onFrame);
+
+function randomAxis() {
+    x = Math.random() * 200;
+    y = Math.random() * 200;
+    z = Math.random() * 200;
+}
+
+function randomStep() {
+    step = Math.random() * 5;
+}
+
+randomAxis();
+randomStep();
