@@ -9,84 +9,81 @@ h1 {
     margin: 0;
 }
 
+.cube-container {
+    padding-top: 123px;
+    width: 500px; /* Size of the cube */
+    height: 500px;
+    perspective: 1000px;
+    margin: 100px auto 0;
+}
+
+.cube {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transform: rotate3d(1, 1, 1, var(--angle));
+}
+
+.cube-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    color: white;
+    font-size: 2em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.front { transform: translateZ(250px); background: rgba(255, 0, 0, 0.7); }
+.back { transform: rotateY(180deg) translateZ(250px); background: rgba(0, 255, 0, 0.7); }
+.right { transform: rotateY(90deg) translateZ(250px); background: rgba(0, 0, 255, 0.7); }
+.left { transform: rotateY(-90deg) translateZ(250px); background: rgba(255, 255, 0, 0.7); }
+.top { transform: rotateX(90deg) translateZ(250px); background: rgba(255, 0, 255, 0.7); }
+.bottom { transform: rotateX(-90deg) translateZ(250px); background: rgba(0, 255, 255, 0.7); }
 
 #cell-holder {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    grid-template-rows: repeat(5, 1fr);
-    aspect-ratio: 1 / 1;
+    grid-template-columns: repeat(5, 1fr); /* 5 cells per row */
+    grid-template-rows: repeat(5, 1fr); /* 5 rows */
     width: 100%;
     height: 100%;
-    perspective: 1000px;
-    gap: 5px;
-    padding-left: 20px;
+    padding: 0;
+    margin: 0;
+}
+
+.cell-holder {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr); /* 5 cells per row */
+    grid-template-rows: repeat(5, 1fr); /* 5 rows */
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
 }
 
 .cell {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: xx-large;
+    font-size: large;
     background-color: dimgrey;
     color: white;
     overflow-wrap: anywhere;
-    border: 3px solid black ;
+    border: 3px solid black;
     border-radius: 30px;
-
-    aspect-ratio: 1 / 1;
-    height: 80%;
 }
 
 .cell.matched {
-    border: 3px solid rgb(99, 255, 51) ;
+    border: 3px solid rgb(99, 255, 51);
 }
 
-
 .cell.selected {
-    border: 3px solid rgb(108, 11, 236) ;
+    border: 3px solid rgb(108, 11, 236);
 }
 
 .cell.error7 {
-    border: 3px solid rgb(212, 1, 1) ;
+    border: 3px solid rgb(212, 1, 1);
 }
-
-.cube-container {
-    padding-top: 123px;
-    width: 800px; /* Example size */
-    height: 800px;
-    perspective: 1000px; /* Perspective for the 3D effect */
-    margin: 100px auto 0; /* Center horizontally */
-  }
-  
-  .cube {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    transform-style: preserve-3d; /* Key for 3D transformations */
-    transform: rotate3d(1, 1, 0, 90deg);
-  }
-  
-  .cube-face {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    text-align: center;
-    line-height: 200px; /* For vertical centering of text */
-    color: white;
-    font-size: 2em;
-    border: 1px solid #ccc;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  /* Position and rotate each face */
-  .front { transform: translateZ(400px); background: rgba(255, 0, 0, 0.7); }
-  .back { transform: rotateY(180deg) translateZ(400px); background: rgba(0, 255, 0, 0.7); }
-  .right { transform: rotateY(90deg) translateZ(400px); background: rgba(0, 0, 255, 0.7); }
-  .left { transform: rotateY(-90deg) translateZ(400px); background: rgba(255, 255, 0, 0.7); }
-  .top { transform: rotateX(90deg) translateZ(400px); background: rgba(255, 0, 255, 0.7); }
-  .bottom { transform: rotateX(-90deg) translateZ(400px); background: rgba(0, 255, 255, 0.7); }
-  
-  /* ... and so on for other faces, adjusting rotations and translations ... */
-  
