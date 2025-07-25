@@ -201,13 +201,13 @@ function onFrame() {
 requestAnimationFrame(onFrame);
 
 function randomAxis() {
-    x = Math.random() * 200;
-    y = Math.random() * 200;
-    z = Math.random() * 200;
+    x = Math.random() * 200 - 100;
+    y = Math.random() * 200 - 100;
+    z = Math.random() * 200 - 100;
 }
 
 function randomStep() {
-    step = Math.random() * 5;
+    step = Math.random() * 5 - 2.5;
 }
 
 randomAxis();
