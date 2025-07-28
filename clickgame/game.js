@@ -7,8 +7,11 @@ let stores = document.getElementsByClassName("store");
 let scoreElement = document.getElementById("score");
 let fighterSelector = document.getElementById("fighter-selector");
 let fighters = [];
-let selectedAttacker;
-let selectedTarget;
+let fighterDivs = [];
+let targetDivs = [];
+let playerTurn = true;
+let selectedPlayer;
+let selectedComp;
 let score = 155;
 let superGompeiCount = 0;
 
@@ -93,6 +96,27 @@ function givePoints(widget) {
 
 }
 
+function showDamage(widget, damage) {
+    let damageElement = document.createElement("span");
+    damageElement.className = "damage";
+    damageElement.style.fontSize = "18px";
+    damageElement.innerHTML = "-" + damage;
+    damageElement.onanimationend = () => {
+        damageElement.remove();
+    }
+    widget.appendChild(damageElement);
+}
+
+function showHealth(widget) {
+    if(widget.getElementsByClassName("health").length > 0)
+        widget.getElementsByClassName("health")[0].remove()
+    let healthElement = document.createElement("span");
+    healthElement.className = "health";
+    healthElement.style.fontSize = "18px";
+    healthElement.innerHTML = widget.getAttribute("health");
+    widget.appendChild(healthElement);
+}
+
 function hideClicker() {
     document.body.style.backgroundColor = "rgb(255, 255, 255)";
     CLICKER_CONTAINER.style.display = "none";
@@ -108,7 +132,9 @@ function showBattle() {
     document.body.style.backgroundColor = "rgb(0, 0, 0)";
     document.body.style.overflow = "hidden";
     BATTLE_CONTAINER.style.display = "block";
+}
 
+function createFighters() {
     if (fighters.length > 0) {
         for (let i = 0; i < fighters.length; i++) {
             for (let store of stores) {
@@ -116,11 +142,12 @@ function showBattle() {
                     document.getElementById("platform").appendChild(store.firstElementChild.cloneNode(true))
                     let element = document.getElementById("platform").lastElementChild;
                     element.classList.add("fighter");
-                    element.style.top = (30 + 10 * i) + "%";
+                    element.style.top = (40 + 10 * i) + "%";
                     element.style.left = (15 + (i % 2 == 1 ? 15 : 0)) + "%";
                     element.onclick = () => {
                         playerAttacker(element)
                     };
+                    fighterDivs.push(element);
                 }
             }
         }
@@ -129,11 +156,12 @@ function showBattle() {
             document.getElementById("platform").appendChild(stores.item(Math.floor(Math.random() * 4)).firstElementChild.cloneNode(true))
             let element = document.getElementById("platform").lastElementChild;
             element.classList.add("fighter");
-            element.style.top = (30 + 10 * i) + "%";
-            element.style.right = (15 + (i % 2 == 1 ? 15 : 0)) + "%";
+            element.style.top = (40 + 10 * i) + "%";
+            element.style.left = (70 + (i % 2 == 1 ? 15 : 0)) + "%";
             element.onclick = () => {
                 playerTarget(element)
             };
+            targetDivs.push(element);
         }
 
     } else {
@@ -199,46 +227,173 @@ function getAttackers() {
 function startBattle() {
     hideClicker();
     fighterSelector.style.display = 'none';
-    showBattle()
+    showBattle();
+    createFighters();
 }
 
 function playerAttacker(fighter) {
-    if (selectedAttacker == fighter) {
+    if (selectedPlayer == fighter) {
         fighter.classList.remove("selected-fighter");
-        selectedAttacker = null;
+        selectedPlayer = null;
         return;
     }
-    if (selectedAttacker != fighter && selectedAttacker) {
-        selectedAttacker.classList.remove("selected-fighter");
+    if (selectedPlayer != fighter && selectedPlayer) {
+        selectedPlayer.classList.remove("selected-fighter");
         fighter.classList.add("selected-fighter");
-        selectedAttacker = fighter;
+        selectedPlayer = fighter;
         return;
     }
-    selectedAttacker = fighter;
+    selectedPlayer = fighter;
     fighter.classList.add("selected-fighter");
 
-    if (selectedAttacker && selectedTarget) {
-        dealDamage();
+    if (selectedPlayer && selectedComp) {
+        moveForDamage();
     }
 }
 
+
+function moveForDamage() {
+    fighterDivs.forEach(element => {
+        element.onclick = () => {
+
+        };
+    });
+    targetDivs.forEach(element => {
+        element.onclick = () => {
+
+        };
+    });
+
+    let target;
+    let attacker;
+    let ogTop;
+    let ogLeft;
+    let slope;
+    let intercept;
+
+    if(playerTurn) {
+        target = selectedComp
+        attacker = selectedPlayer
+    } else {
+        target = selectedPlayer
+        attacker = selectedComp
+    
+    }
+
+    ogTop = attacker.style.top;
+    ogLeft = attacker.style.left;
+
+
+    const targetRect = target.getBoundingClientRect();
+    const containerRect = document.getElementById('platform').getBoundingClientRect();
+
+    let targetTop = ((targetRect.top - containerRect.top) / containerRect.height) * 100;
+    let targetLeft = ((targetRect.left - containerRect.left) / containerRect.width) * 100;
+
+    const duration = 1000; // milliseconds
+    let startTime = null;
+
+    
+    onattack = (currentTime) => {
+        // selectedPlayer.style.top = (parseInt(selectedPlayer.style.top) + 1) + "%";
+        if (!startTime) startTime = currentTime;
+        const elapsedTime = currentTime - startTime;
+
+        const progress = Math.min(elapsedTime / duration, 1); // Clamp progress between 0 and 1
+
+        const currentTop = parseInt(ogTop) + (targetTop - parseInt(ogTop)) * progress;
+        const currentLeft = parseInt(ogLeft) + (targetLeft - parseInt(ogLeft)) * progress;
+
+        slope = (parseInt(target.style.top) - parseInt(attacker.style.top)) / ((parseInt(target.style.left)) - parseInt(attacker.style.left));
+        intercept = parseInt(attacker.style.top) - (slope * parseInt(attacker.style.left));
+
+
+        attacker.style.left = currentLeft + "%";
+        attacker.style.top = currentTop + "%";
+
+        if (progress >= 1) {
+            attacker.style.top = ogTop;
+            attacker.style.left = ogLeft;
+            console.log(target)
+            dealDamage(attacker, target);
+            setTimeout(() => {
+                afterDamageChecks();
+            }, 1000);
+        } else {
+            requestAnimationFrame(onattack);
+        }
+    }
+
+    requestAnimationFrame(onattack);
+}
+
+function dealDamage(attacker, target) {
+    
+    target.setAttribute("health", parseInt(target.getAttribute("health")) - parseInt(attacker.getAttribute("damage")));
+    showDamage(target, attacker.getAttribute("damage"));
+    showHealth(target);
+}
+
+function afterDamageChecks(target) {
+
+    if (playerTurn) 
+        target = selectedComp
+    else
+        target = selectedPlayer
+
+
+    if (parseInt(target.getAttribute("health")) <= 0) {
+        target.remove();
+    }
+    selectedComp.classList.remove("selected-fighter");
+    selectedPlayer.classList.remove("selected-fighter");
+    selectedComp = null;
+    selectedPlayer = null;
+    playerTurn = !playerTurn;
+    if (!playerTurn) {
+        setTimeout(() => {
+            selectedComp = targetDivs[Math.floor(Math.random() * targetDivs.length)];
+            selectedComp.classList.add("selected-fighter");
+        }, 1000);
+
+        setTimeout(() => {
+            selectedPlayer = fighterDivs[Math.floor(Math.random() * fighterDivs.length)];
+            selectedPlayer.classList.add("selected-fighter");
+        }, 3000);
+
+        setTimeout(() => {
+            moveForDamage();
+        }, 5000);
+    } else {
+        fighterDivs.forEach(element => {
+            element.onclick = () => {
+                playerAttacker(element)
+            };
+        });
+        targetDivs.forEach(element => {
+            element.onclick = () => {
+                playerTarget(element)
+            };
+        });
+    }
+}
 function playerTarget(target) {
-    if (selectedTarget == target) {
+    if (selectedComp == target) {
         target.classList.remove("selected-fighter");
-        selectedTarget = null;
+        selectedComp = null;
         return;
     }
-    if (selectedTarget != target && selectedTarget) {
-        selectedTarget.classList.remove("selected-fighter");
+    if (selectedComp != target && selectedComp) {
+        selectedComp.classList.remove("selected-fighter");
         target.classList.add("selected-fighter");
-        selectedTarget = target;
+        selectedComp = target;
         return;
     }
-    selectedTarget = target;
+    selectedComp = target;
     target.classList.add("selected-fighter");
 
-    if (selectedAttacker && selectedTarget) {
-        dealDamage();
+    if (selectedPlayer && selectedComp) {
+        moveForDamage();
     }
 }
 
@@ -262,3 +417,5 @@ document.addEventListener("keydown", (e) => {
         hideBattle();
     }
 })
+
+

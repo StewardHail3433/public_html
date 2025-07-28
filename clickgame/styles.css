@@ -122,6 +122,26 @@ body {
     top: 50%;
 }
 
+.damage {
+    position: absolute;
+    transform-origin: center;
+    color: rgb(255, 0, 0);
+    animation-name: damage-float;
+    animation-timing-function: linear;
+    animation-duration: 3s;
+    animation-iteration-count: 1;
+    left: 50%;
+    top: 50%;
+}
+
+.health {
+    position: absolute;
+    transform-origin: center;
+    color: rgb(73, 255, 22);
+    left: 35%;
+    top: 5%;
+}
+
 .center {
     text-align: center;
 }
@@ -131,6 +151,13 @@ body {
     100% {
         opacity: 0%;
         transform: translateY(-50px);
+    }
+}
+
+@keyframes damage-float {
+    100% {
+        opacity: 0%;
+        transform: translateY(-75px);
     }
 }
 
