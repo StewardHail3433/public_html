@@ -5,8 +5,10 @@ const BATTLE_CONTAINER = document.getElementById("battle-container");
 let widgetContainer = document.getElementById("widget-container");
 let stores = document.getElementsByClassName("store");
 let scoreElement = document.getElementById("score");
-let figterSelector = document.getElementById("fighter-selector");
+let fighterSelector = document.getElementById("fighter-selector");
 let fighters = [];
+let selectedAttacker;
+let selectedTarget;
 let score = 155;
 let superGompeiCount = 0;
 
@@ -106,55 +108,138 @@ function showBattle() {
     document.body.style.backgroundColor = "rgb(0, 0, 0)";
     document.body.style.overflow = "hidden";
     BATTLE_CONTAINER.style.display = "block";
+
+    if (fighters.length > 0) {
+        for (let i = 0; i < fighters.length; i++) {
+            for (let store of stores) {
+                if (store.getAttribute("name") == fighters[i]) {
+                    document.getElementById("platform").appendChild(store.firstElementChild.cloneNode(true))
+                    let element = document.getElementById("platform").lastElementChild;
+                    element.classList.add("fighter");
+                    element.style.top = (30 + 10 * i) + "%";
+                    element.style.left = (15 + (i % 2 == 1 ? 15 : 0)) + "%";
+                    element.onclick = () => {
+                        playerAttacker(element)
+                    };
+                }
+            }
+        }
+
+        for (let i = 0; i < 3; i++) {
+            document.getElementById("platform").appendChild(stores.item(Math.floor(Math.random() * 4)).firstElementChild.cloneNode(true))
+            let element = document.getElementById("platform").lastElementChild;
+            element.classList.add("fighter");
+            element.style.top = (30 + 10 * i) + "%";
+            element.style.right = (15 + (i % 2 == 1 ? 15 : 0)) + "%";
+            element.onclick = () => {
+                playerTarget(element)
+            };
+        }
+
+    } else {
+        hideBattle();
+        showClicker();
+    }
 }
 
 function hideBattle() {
+    fighters = [];
+
+    if (document.getElementById("platform").children.length > 1) {
+        for (let c of Array.from(document.getElementById("platform").children).reverse()) {
+
+            if (document.getElementById("platform").children.length == 1)
+                break;
+
+            c.remove();
+        }
+    }
     document.body.style.backgroundColor = "rgb(0, 31, 0)";
-    document.body.style.overflow = "default";
+    document.body.style.overflowY = "scroll";
+    document.body.style.overflowX = "hidden";
     BATTLE_CONTAINER.style.display = "none";
 }
 
 function getAttackers() {
+    fighterSelector.querySelector(".box")?.lastChild.remove();
+    fighters = [];
     if (widgetContainer.children.length > 0) {
-        figterSelector.style.display = 'flex';
-        document.body.style.overflow = 'hidden'; // disable background scroll
+        fighterSelector.style.display = 'flex';
+        document.body.style.overflowY = 'hidden'; // disable background scroll
         let newWidgetContainer = widgetContainer.cloneNode(true);
         newWidgetContainer.id = "selector-widget-container"
-        console.log(newWidgetContainer);
-        for (let widget of newWidgetContainer.children) {
-            widget.setAttribute("atuo", "false");
+
+        for (let widget of Array.from(newWidgetContainer.children)) {
+            widget.setAttribute("auto", "false");
             widget.removeAttribute("harvesting");
-            console.log(widget);
-            widget.children.forEach(child => {
-                console.log(child.tagName);
-            })
             widget.onclick = () => {
                 if (widget.classList.contains("selected-fighter")) {
                     widget.classList.remove("selected-fighter");
-                    fighters.forEach((fighter, index) => {
-                        if (fighter == widget.getAttribute("name")) {
-                            fighters.splice(index, 1);
+                    for (let i = 0; i < fighters.length; i++) {
+                        if (fighters[i] == widget.getAttribute("name")) {
+                            fighters.splice(i, 1);
+                            break;
                         }
-                    });
+                    }
                 } else {
                     if (fighters.length < 3) {
                         fighters.push(widget.getAttribute("name"));
                         widget.classList.add("selected-fighter");
                     }
                 }
-                console.log(fighters);
             }
+            widget.style.width = "100px"
+            widget.style.height = "100px"
         }
-        newWidgetContainer.style.overflow = "scroll";
-        figterSelector.querySelector(".box")?.appendChild(newWidgetContainer);
+        fighterSelector.querySelector(".box")?.appendChild(newWidgetContainer);
     }
 }
 
 
 function startBattle() {
     hideClicker();
-    figterSelector.style.display = 'none';
+    fighterSelector.style.display = 'none';
     showBattle()
+}
+
+function playerAttacker(fighter) {
+    if (selectedAttacker == fighter) {
+        fighter.classList.remove("selected-fighter");
+        selectedAttacker = null;
+        return;
+    }
+    if (selectedAttacker != fighter && selectedAttacker) {
+        selectedAttacker.classList.remove("selected-fighter");
+        fighter.classList.add("selected-fighter");
+        selectedAttacker = fighter;
+        return;
+    }
+    selectedAttacker = fighter;
+    fighter.classList.add("selected-fighter");
+
+    if (selectedAttacker && selectedTarget) {
+        dealDamage();
+    }
+}
+
+function playerTarget(target) {
+    if (selectedTarget == target) {
+        target.classList.remove("selected-fighter");
+        selectedTarget = null;
+        return;
+    }
+    if (selectedTarget != target && selectedTarget) {
+        selectedTarget.classList.remove("selected-fighter");
+        target.classList.add("selected-fighter");
+        selectedTarget = target;
+        return;
+    }
+    selectedTarget = target;
+    target.classList.add("selected-fighter");
+
+    if (selectedAttacker && selectedTarget) {
+        dealDamage();
+    }
 }
 
 hideBattle();
