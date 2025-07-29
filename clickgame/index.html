@@ -10,6 +10,7 @@
 </head>
 
 <body>
+    <button class="home-button" id="home-button" onclick="window.location.href='../index.html'">Back Home</button>
     <div id="clicker-container">
         <h1 class="center">Gompei's Grass Game</h1>
         <h2 class="center" id="score">Score: 0</h2>
@@ -64,7 +65,7 @@
                 <div id="selection">
                     <button class="top-right-button" id="start-battle-button" onclick="startBattle()">Start Battle</button>
                 </div>
-                <div id="battle-info">
+                <div id="battle-info" style="display: none;">
                     <button class="top-right-button" id="close-button" onclick="showClicker()">Back</button>
                     <span id="info" style="color: black;"></span>
                 </div>
@@ -76,6 +77,8 @@
             <img src="./grass.jpg" id="battle-ground">
         </div>
     </div>
+
+    
 
 </body>
 

@@ -251,3 +251,15 @@ body {
     height: 80px;
     transform: rotateX(10deg);
 }
+
+.home-button {
+    position: sticky;
+    top: 10px;
+    left: 10px;
+    border: rgb(192, 192, 192) 2px solid;
+    background: black;
+    color: rgb(192, 192, 192);
+    font-size: 25px;
+    cursor: pointer;
+    z-index: 99999;
+}
