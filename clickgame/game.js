@@ -1,4 +1,5 @@
 const CLICKER_CONTAINER = document.getElementById("clicker-container");
+const STORE_CONTAINER = document.getElementById("store-container");
 const BATTLE_CONTAINER = document.getElementById("battle-container");
 
 
@@ -108,7 +109,7 @@ function showDamage(widget, damage) {
 }
 
 function showHealth(widget) {
-    if(widget.getElementsByClassName("health").length > 0)
+    if (widget.getElementsByClassName("health").length > 0)
         widget.getElementsByClassName("health")[0].remove()
     let healthElement = document.createElement("span");
     healthElement.className = "health";
@@ -126,6 +127,9 @@ function showClicker() {
     document.body.style.backgroundColor = "rgb(0, 31, 0)";
     document.body.style.overflow = "default";
     CLICKER_CONTAINER.style.display = "block";
+    fighterSelector.style.display = 'none';
+    document.getElementById("selection").style.display = "none";
+    document.getElementById("battle-info").style.display = "none";
 }
 
 function showBattle() {
@@ -153,7 +157,7 @@ function createFighters() {
         }
 
         for (let i = 0; i < 3; i++) {
-            document.getElementById("platform").appendChild(stores.item(Math.floor(Math.random() * 4)).firstElementChild.cloneNode(true))
+            document.getElementById("platform").appendChild(stores.item(Math.floor(Math.random() * stores.length)).firstElementChild.cloneNode(true))
             let element = document.getElementById("platform").lastElementChild;
             element.classList.add("fighter");
             element.style.top = (40 + 10 * i) + "%";
@@ -189,10 +193,9 @@ function hideBattle() {
 }
 
 function getAttackers() {
-    fighterSelector.querySelector(".box")?.lastChild.remove();
-    fighters = [];
     if (widgetContainer.children.length > 0) {
         fighterSelector.style.display = 'flex';
+        document.getElementById("selection").style.display = "block";
         document.body.style.overflowY = 'hidden'; // disable background scroll
         let newWidgetContainer = widgetContainer.cloneNode(true);
         newWidgetContainer.id = "selector-widget-container"
@@ -219,12 +222,12 @@ function getAttackers() {
             widget.style.width = "100px"
             widget.style.height = "100px"
         }
-        fighterSelector.querySelector(".box")?.appendChild(newWidgetContainer);
+        document.getElementById("selection").appendChild(newWidgetContainer);
     }
 }
 
-
 function startBattle() {
+    document.getElementById("selection").style.display = "none";
     hideClicker();
     fighterSelector.style.display = 'none';
     showBattle();
@@ -251,6 +254,25 @@ function playerAttacker(fighter) {
     }
 }
 
+function playerTarget(target) {
+    if (selectedComp == target) {
+        target.classList.remove("selected-fighter");
+        selectedComp = null;
+        return;
+    }
+    if (selectedComp != target && selectedComp) {
+        selectedComp.classList.remove("selected-fighter");
+        target.classList.add("selected-fighter");
+        selectedComp = target;
+        return;
+    }
+    selectedComp = target;
+    target.classList.add("selected-fighter");
+
+    if (selectedPlayer && selectedComp) {
+        moveForDamage();
+    }
+}
 
 function moveForDamage() {
     fighterDivs.forEach(element => {
@@ -264,20 +286,15 @@ function moveForDamage() {
         };
     });
 
-    let target;
-    let attacker;
-    let ogTop;
-    let ogLeft;
-    let slope;
-    let intercept;
+    let target, attacker, ogTop, ogLeft;
 
-    if(playerTurn) {
-        target = selectedComp
-        attacker = selectedPlayer
+    if (playerTurn) {
+        target = selectedComp;
+        attacker = selectedPlayer;
     } else {
-        target = selectedPlayer
-        attacker = selectedComp
-    
+        target = selectedPlayer;
+        attacker = selectedComp;
+
     }
 
     ogTop = attacker.style.top;
@@ -290,23 +307,18 @@ function moveForDamage() {
     let targetTop = ((targetRect.top - containerRect.top) / containerRect.height) * 100;
     let targetLeft = ((targetRect.left - containerRect.left) / containerRect.width) * 100;
 
-    const duration = 1000; // milliseconds
+    const duration = 500;
     let startTime = null;
 
-    
+
     onattack = (currentTime) => {
-        // selectedPlayer.style.top = (parseInt(selectedPlayer.style.top) + 1) + "%";
         if (!startTime) startTime = currentTime;
         const elapsedTime = currentTime - startTime;
 
-        const progress = Math.min(elapsedTime / duration, 1); // Clamp progress between 0 and 1
+        const progress = Math.min(elapsedTime / duration, 1);
 
         const currentTop = parseInt(ogTop) + (targetTop - parseInt(ogTop)) * progress;
         const currentLeft = parseInt(ogLeft) + (targetLeft - parseInt(ogLeft)) * progress;
-
-        slope = (parseInt(target.style.top) - parseInt(attacker.style.top)) / ((parseInt(target.style.left)) - parseInt(attacker.style.left));
-        intercept = parseInt(attacker.style.top) - (slope * parseInt(attacker.style.left));
-
 
         attacker.style.left = currentLeft + "%";
         attacker.style.top = currentTop + "%";
@@ -328,7 +340,6 @@ function moveForDamage() {
 }
 
 function dealDamage(attacker, target) {
-    
     target.setAttribute("health", parseInt(target.getAttribute("health")) - parseInt(attacker.getAttribute("damage")));
     showDamage(target, attacker.getAttribute("damage"));
     showHealth(target);
@@ -336,19 +347,90 @@ function dealDamage(attacker, target) {
 
 function afterDamageChecks(target) {
 
-    if (playerTurn) 
+    if (playerTurn)
         target = selectedComp
     else
         target = selectedPlayer
+    checkDeath(target);
 
-
-    if (parseInt(target.getAttribute("health")) <= 0) {
-        target.remove();
+    if (checkWin().length > 0) {
+        let winner = checkWin()
+        resetBattle();
+        hideBattle();
+        showClicker();
+        winnerActions(winner)
+        return;
     }
+
     selectedComp.classList.remove("selected-fighter");
     selectedPlayer.classList.remove("selected-fighter");
     selectedComp = null;
     selectedPlayer = null;
+
+    nextTurn();
+}
+
+function winnerActions(winner) {
+    showClicker();
+    fighterSelector.style.display = 'flex';
+    document.body.style.overflowY = 'hidden';
+    document.getElementById("selection").style.display = "none";
+    document.getElementById("battle-info").style.display = "block";
+    if(winner == "player") {
+        document.getElementById("info").innerHTML = `You won, you gain 2000 score`
+        changeScore(200)
+    } else {
+        let lostWidgets = Math.floor(Math.random() * widgetContainer.children.length);
+        for(let i = 0; i < lostWidgets; i++) {
+            widgetContainer.children.item(Math.floor(Math.random() * widgetContainer.children.length)).remove();
+        }
+        document.getElementById("info").innerHTML = `You lost, you lost ${lostWidgets} widgets 🥺 and 4000 score (dont worry you still have a score of 5 if you dont have 4000)`
+        changeScore(-4000);
+        if(score < 5) {
+            score = 5;
+        }
+    }
+}
+
+function checkDeath(target) {
+    if (parseInt(target.getAttribute("health")) <= 0) {
+        target.remove();
+        for (let i = 0; i < fighterDivs.length; i++) {
+            if (fighterDivs[i] == target) {
+                fighterDivs.splice(i, 1);
+                break;
+            }
+        }
+
+        for (let i = 0; i < targetDivs.length; i++) {
+            if (targetDivs[i] == target) {
+                targetDivs.splice(i, 1);
+                break;
+            }
+        }
+    }
+}
+
+function checkWin() {
+    if (fighterDivs.length == 0) {
+        return "comp";
+    }
+    if (targetDivs.length == 0) {
+        return "player";
+    }
+    return ""
+}
+
+function resetBattle() {
+    selectedComp = null;
+    selectedPlayer = null;
+    fighters = [];
+    fighterDivs = [];
+    targetDivs = [];
+    playerTurn = true;
+}
+
+function nextTurn() {
     playerTurn = !playerTurn;
     if (!playerTurn) {
         setTimeout(() => {
@@ -377,30 +459,86 @@ function afterDamageChecks(target) {
         });
     }
 }
-function playerTarget(target) {
-    if (selectedComp == target) {
-        target.classList.remove("selected-fighter");
-        selectedComp = null;
-        return;
-    }
-    if (selectedComp != target && selectedComp) {
-        selectedComp.classList.remove("selected-fighter");
-        target.classList.add("selected-fighter");
-        selectedComp = target;
-        return;
-    }
-    selectedComp = target;
-    target.classList.add("selected-fighter");
 
-    if (selectedPlayer && selectedComp) {
-        moveForDamage();
+function createStore(name, cost, reap, auto, cooldown, health, damage, text, imgPath) {
+    let store = document.createElement("div");
+    store.classList.add("store");
+    store.setAttribute("name", name);
+    store.setAttribute("cost", cost);
+    store.setAttribute("reap", reap);
+    store.setAttribute("cooldown", cooldown);
+    store.setAttribute("auto", auto);
+    store.onclick = (event) => {
+        buy(event.currentTarget);
+    };
+
+    let widget = document.createElement("div");
+    widget.classList.add("widget");
+    widget.setAttribute("name", name);
+    widget.setAttribute("reap", reap);
+    widget.setAttribute("cooldown", cooldown);
+    widget.setAttribute("auto", auto);
+    widget.setAttribute("health", health);
+    widget.setAttribute("damage", damage);
+
+    if (text.length > 0) {
+        let nameElement = document.createElement("p");
+        nameElement.innerHTML = text
+        widget.appendChild(nameElement);
+    } else {
+        let img = document.createElement("img");
+        img.src = imgPath;
+        widget.appendChild(img);
     }
+
+    let overlay = document.createElement("div");
+    overlay.classList.add("overlay-slide");
+    overlay.style.animationDuration = `${cooldown}s`;
+    widget.appendChild(overlay);
+
+    store.appendChild(widget);
+
+    let pName = document.createElement("p");
+    pName.innerHTML = name;
+
+    let pCost = document.createElement("p");
+    pCost.innerHTML = `${cost} points`;
+
+    let pReap = document.createElement("p");
+    pReap.innerHTML = `+${reap} sqft`;
+
+    let pCooldown = document.createElement("p");
+    pCooldown.innerHTML = `${cooldown}s`;
+
+    let pHealth = document.createElement("p");
+    pHealth.innerHTML = `Health: ${health}`;
+
+    let pDamage = document.createElement("p");
+    pDamage.innerHTML = `Damage: ${damage}`;
+
+    store.appendChild(pName);
+    store.appendChild(pCost);
+    store.appendChild(pReap);
+    store.appendChild(pCooldown);
+    store.appendChild(pHealth);
+    store.appendChild(pDamage);
+
+    STORE_CONTAINER.appendChild(store);
 }
 
+createStore("JS", 100, 75, false, 1.5, 75, 50, "", "./js.png");
+createStore("HTML", 50, 30, false, 1, 40, 15, "", "./HTML.png");
+createStore("CSS", 75, 50, false, 1.2, 60, 25, "CSS", "./css.png");
+createStore("Python", 150, 100, true, 2, 100, 60, "Python", "./python.png");
+createStore("C++", 250, 160, true, 3, 150, 90, "C++", "./cpp.png");
+createStore("Java", 400, 220, true, 4, 180, 110, "JAVA", "./java.png");
+createStore("Rust", 600, 300, true, 4.5, 200, 130, "RUST", "./rust.png");
+createStore("Go", 850, 400, true, 5.5, 220, 150, "Go", "./go.png");
+createStore("C#", 1200, 500, true, 6, 250, 180, "C#", "./csharp.png");
+createStore("Assembly", 2000, 800, false, 7.5, 300, 250, "Assembly", "");
+
+
 hideBattle();
-// showClicker();
-// hideClicker();
-// showBattle()
 changeScore(0);
 
 
@@ -408,14 +546,4 @@ document.addEventListener("keydown", (e) => {
     if (e.key == "Escape") {
         getAttackers();
     }
-    if (e.key == "Enter") {
-        hideClicker();
-        showBattle();
-    }
-    if (e.key == "1") {
-        showClicker();
-        hideBattle();
-    }
 })
-
-

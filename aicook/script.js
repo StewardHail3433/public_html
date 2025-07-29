@@ -126,7 +126,7 @@ class AICookApp {
     }
 
     showLoading(isLoading) {
-        if (loading) {
+        if (isLoading) {
             this.loading.classList.add("show");
             this.generateBtn.disabled = true;
             this.generateBtn.textContent = "Generating...";
@@ -176,7 +176,7 @@ class AICookApp {
                     }]
                 }],
                 generationConfig: {
-                    temperature: 0.7,
+                    temperature: 1.0,
                     topK: 40,
                     topP: 0.95,
                     maxOutputTokens: 2048

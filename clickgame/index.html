@@ -50,10 +50,10 @@
                 onclick="buy(event.currentTarget)">
                 <div class="widget" reap="600" cooldown="3.0" auto="true" name="Bob" health="100" damage="55">
                     <img src="./download.jpg">
-                    <div class="overlay-slide" style="animation-duration: 0.1s;"></div>
+                    <div class="overlay-slide" style="animation-duration: 3.0s;"></div>
                 </div>
                 <p>Bob</p>
-                <p>1 points</p>
+                <p>900 points</p>
                 <p>+600 sqft</p>
                 <p>3.0s</p>
             </div>
@@ -61,8 +61,13 @@
         <div id="widget-container"></div>
         <div class="modal-overlay" id="fighter-selector">
             <div class="box">
-                <button class="top-right-button" id="start-battle-button" onclick="startBattle()">Start Battle</button>
-                <h2>Hi</h2>
+                <div id="selection">
+                    <button class="top-right-button" id="start-battle-button" onclick="startBattle()">Start Battle</button>
+                </div>
+                <div id="battle-info">
+                    <button class="top-right-button" id="close-button" onclick="showClicker()">Back</button>
+                    <span id="info" style="color: black;"></span>
+                </div>
             </div>
         </div>
     </div>
