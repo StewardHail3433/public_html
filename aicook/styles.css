@@ -12,7 +12,7 @@
 /* Main body styles - sets up the overall page appearance */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern, readable font stack */
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* Beautiful gradient background */
+    background: linear-gradient(135deg, #ead066 0%, #594ba2 100%); /* Beautiful gradient background */
     min-height: 100vh; /* Ensures full viewport height coverage */
     color: #333; /* Dark gray text for good readability */
 }
