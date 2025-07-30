@@ -4,9 +4,12 @@ let currentLanguage = "en-US";
 let currentLanguageName = "English";
 
 let geminiApiKey = localStorage.getItem('geminiApiKey') || '';
-let apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`;
 
 async function generateStory(prompt) {
+    geminiApiKey = localStorage.getItem('geminiApiKey') || '';
+
+    if(geminiApiKey.length == 0 ) return;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`;
     const body = {
         contents: [{
             parts: [{
@@ -79,6 +82,7 @@ function setApiKey(key) {
     const apiKey = key.trim();
     if (!apiKey) {
         console.log("GeminiAPI key cannot be empty");
+        localStorage.removeItem('geminiApiKey');
         return false;
     }
     geminiApiKey = key;
