@@ -10,7 +10,7 @@ export const PADDLE_WIDTH = 25;
 export const PADDLE_HEIGHT = 100;
 export const BALL_RADIUS = 12.5;
 export const PADDLE_VELOCITY = 5;
-export const PADDLE_FORCE = 1.5; // 110% of speed before
+export const PADDLE_FORCE = 1.1; // 110% of speed before
 
 export class Model {
     ball;
@@ -34,6 +34,8 @@ export class Model {
         this.resetBall();
         this.paddleL = new Paddle(0, 0, PADDLE_WIDTH, PADDLE_HEIGHT, SIDE.LEFT, "red");
         this.paddleR = new Paddle(BOARD_WIDTH - PADDLE_WIDTH, 0, PADDLE_WIDTH, PADDLE_HEIGHT, SIDE.RIGHT, "green");
+        this.scoreL = 0;
+        this.scoreR = 0;
     }
 
     resetBall() {

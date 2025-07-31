@@ -4,6 +4,7 @@ import { bind_events, draw_game, speak_miss, updateScore, speak_win } from './vi
 export function onTick(model) {
     switch (model.state) {
         case STATE.STARTUP:
+            updateScore(model);
             model.state = STATE.PLAYING;
             break;
         case STATE.PLAYING:
