@@ -3,7 +3,7 @@ import Entity  from "./Entity.js";
 export default class Player extends Entity {
     constructor(pos = {x: 0, y: 0}, size = {width: 10, height: 10}, color = "red") {
         super(pos, size, color);
-        this.speed = 1;
+        this.speed = 0.3;
         this.moving = {up: false, down: false, left: false, right: false}
     }
 
