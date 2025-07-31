@@ -1,10 +1,15 @@
-import Player from "./Player.js"
-import Projectile from "./Projectile.js"
+import Player from "./Entity/Player.js"
+import AlertTextElement from "./UI/AlertTextElement.js";
+import Menu from "./UI/Menu.js";
+import TextElement from "./UI/TextElement.js";
 
 class Game {
     constructor() {
         this.canvas = document.querySelector("canvas");
         this.ctx = this.canvas.getContext("2d");
+        this.menu = new Menu();
+        this.menu.addUiElement("score", new TextElement("score: 0", 0, 0));
+        this.alertNumber = 0;
         this.canvas.width = 600;
         this.canvas.height = 600;
         this.player = new Player({ x: 275, y: 275 }, { width: 50, height: 50 }, "blue");
@@ -13,6 +18,7 @@ class Game {
     }
 
     init() {
+        this.ctx.textBaseline = "top";
         this.initkeyBinds();
         requestAnimationFrame(this.gameLoop.bind(this));
     }
@@ -57,9 +63,10 @@ class Game {
             const rect = this.canvas.getBoundingClientRect()
             const x = e.clientX - rect.left
             const y = e.clientY - rect.top
-            this.projectile = new Projectile({...this.player.pos}, 0, {width:20, width:20}, {x:0, y:0})
-            
-
+            this.player.shoot(x, y);
+            this.menu.addUiElement("alert" + this.alertNumber, new AlertTextElement("shot!", this.player.pos.x + this.player.size.width / 2, this.player.pos.y + this.player.size.height / 2))
+            this.alertNumber++;
+            this.alertNumber %= 10;
         }
         document.addEventListener("keydown", keyDown.bind(this));
     
@@ -71,10 +78,12 @@ class Game {
 
     update(dt) {
         this.player.update(dt);
-        if(this.projectile) {
-            this.projectile.update(dt);
-            // console.log(this.projectile.pos);
+        if(this.player.getProjectiles().projectiles.length > 0) {
+            for(let i = 0; i < this.player.getProjectiles().projectiles.length; i++) 
+                this.player.getProjectiles().projectiles[i].update(dt);
         }
+
+        this.menu.update(dt);
     }
 
     render() {
@@ -82,9 +91,12 @@ class Game {
         this.ctx.fillStyle = "RED";
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.player.render(this.ctx);
-        if(this.projectile) {
-            this.projectile.render(this.ctx);
+        if(this.player.getProjectiles().projectiles.length > 0) {
+            for(let i = 0; i < this.player.getProjectiles().projectiles.length; i++) 
+                this.player.getProjectiles().projectiles[i].render(this.ctx);
         }
+
+        this.menu.render(this.ctx);
     }
 
     gameLoop(currentTime) {
