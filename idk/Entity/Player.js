@@ -7,6 +7,7 @@ export default class Player extends Entity {
         this.speed = 0.3;
         this.moving = {up: false, down: false, left: false, right: false}
         this.projectiles = [];
+        this.damage = 10;
     }
 
     shoot(x, y) {
@@ -52,11 +53,7 @@ export default class Player extends Entity {
     }
 
     render(ctx) {
-        ctx.fillStyle = this.color;
-        ctx.beginPath();
-        ctx.fillRect(this.pos.x, this.pos.y, this.size.width, this.size.height);
-        ctx.closePath();
-        ctx.fill();
+       super.render(ctx)
     }
 
     checkProjectileDeletion() {

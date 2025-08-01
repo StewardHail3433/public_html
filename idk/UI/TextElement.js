@@ -1,11 +1,9 @@
 import UIElement from "./UiElement.js";
 
 export default class TextElement extends UIElement {
-    constructor(text, x, y, font = 'Arial', color = 'black', size = 20, align = 'left') {
-        super();
+    constructor(text, x, y, font = 'Arial', color = 'white', size = 20, align = 'left') {
+        super(x, y);
         this.text = text;
-        this.x = x;
-        this.y = y;
         this.font = font;
         this.color = color;
         this.size = size;

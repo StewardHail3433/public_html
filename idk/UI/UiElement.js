@@ -1,5 +1,8 @@
 export default class UIElement {
-    constructor(){}
+    constructor(x, y){
+        this.x = x;
+        this.y = y;
+    }
     render(ctx){}
     update(dt){}
 }

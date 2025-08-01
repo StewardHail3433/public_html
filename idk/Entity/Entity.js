@@ -5,16 +5,45 @@ export default class Entity {
         this.color = color;
         this.vel = {x: 0, y: 0};
         this.speed = 1;
+        this.health = 100;
+        this.maxHealth = 100;
+        this.healthBar = null;
+        this.isInvincible = false;
+        this.invincibleTime = 0;
+        this.maxInvincibleTime = 1000;
+        this.shouldDelete = false;
     }
 
     update(dt) {
         this.move(dt);
+        if(this.healthBar) {
+            this.healthBar.x = this.pos.x + this.size.width/2 - (this.healthBar.lockedWidth ? this.healthBar.lockedWidth/2 : this.maxHealth/2);
+            this.healthBar.y = this.pos.y + this.size.height + 10;
+            this.healthBar.health = this.health;
+            this.healthBar.maxHealth = this.maxHealth;
+        }
+        this.checkInvincible(dt);
+        this.checkDeath();
+    }
+
+    checkInvincible(dt) {
+        if(this.isInvincible) {
+            this.invincibleTime += dt;
+            if(this.invincibleTime >= this.maxInvincibleTime) {
+                this.isInvincible = false;
+            }
+        } else {
+            this.invincibleTime = 0;
+        }
+    }
+
+    checkDeath() {
+        if(this.health <= 0) {
+            this.shouldDelete = true;
+        }
     }
 
     move(dt) {
-        this.vel.y = 0;
-        this.vel.x = 0;
-
         this.normailizeVel();
 
         this.vel.y = Math.min(Math.max(this.vel.y, -this.speed), this.speed);
@@ -25,6 +54,10 @@ export default class Entity {
     }
 
     render(ctx) {
+        if (this.isInvincible) {
+            if (Math.floor(this.invincibleTime / 100) % 2 === 0) return;
+        }
+
         ctx.fillStyle = this.color;
         ctx.beginPath();
         ctx.fillRect(this.pos.x, this.pos.y, this.size.width, this.size.height);

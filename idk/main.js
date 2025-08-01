@@ -2,22 +2,54 @@ import Player from "./Entity/Player.js"
 import AlertTextElement from "./UI/AlertTextElement.js";
 import Menu from "./UI/Menu.js";
 import TextElement from "./UI/TextElement.js";
+import Enemy from "./Entity/Enemy.js";
+import HealthBarElement from "./UI/HealthBarElement.js";
+import CollisionHandler from "./Collisions/CollisionHandler.js";
+import Utils from "./utils/Utils.js";
 
 class Game {
     constructor() {
         this.canvas = document.querySelector("canvas");
         this.ctx = this.canvas.getContext("2d");
-        this.menu = new Menu();
-        this.menu.addUiElement("score", new TextElement("score: 0", 0, 0));
+        this.gameUI = new Menu();
+        this.gameUI.addUiElement("score", new TextElement("score: 0", 0, 0));
+        this.AlertUI = new Menu();
         this.alertNumber = 0;
+        this.enemies = []
+        
         this.canvas.width = 600;
         this.canvas.height = 600;
         this.player = new Player({ x: 275, y: 275 }, { width: 50, height: 50 }, "blue");
+        this.player.healthBar = new HealthBarElement(this.player.pos.x, this.player.pos.y, this.player.health, this.player.maxHealth);
+        this.gameUI.addUiElement("player_health", this.player.healthBar);
         this.lastTime = 0;
+        this.enemyIdCount = 0;
+        this.score = 0;
         this.init();
     }
 
+    // spawnEnemies() {
+    //         let x = 0;
+    //         let y = 0;
+    //         let distance = 0;
+    //         let onTopOfPlayer = false;
+
+    //         do {
+    //             x = this.player.pos.x + (Math.random() - 0.5) * 600; // random position
+    //             y = this.player.pos.y + (Math.random() - 0.5) * 600;
+    //             distance = Math.hypot(x - this.player.pos.x, y - this.player.pos.y);
+
+    //             onTopOfPlayer =Utils.containBox({...this.player.pos, ...this.player.size}, {x:x, y:y, width:50, height:50})
+    //         } while (distance < 100 || !onTopOfPlayer);
+    //     const enemy = new Enemy({ x: x, y: y }, { width: 50, height: 50 }, "green", this.player);
+    //     enemy.healthBar = new HealthBarElement(enemy.pos.x, enemy.pos.y, enemy.health, enemy.maxHealth);
+    //     enemy.id = this.enemyIdCount;
+    //     this.enemyIdCount++;
+    //     this.enemies.push(enemy);
+    // }
+
     init() {
+        // this.spawnEnemies();
         this.ctx.textBaseline = "top";
         this.initkeyBinds();
         requestAnimationFrame(this.gameLoop.bind(this));
@@ -25,7 +57,7 @@ class Game {
 
     initkeyBinds() {
 
-        let keyDown =  (e) => {
+        let keyDown = (e) => {
             switch (e.key) {
                 case 'w':
                     this.player.moving.up = true;
@@ -38,6 +70,14 @@ class Game {
                     break;
                 case 'd':
                     this.player.moving.right = true;
+                    break;
+                case 'l':
+                    const enemy = new Enemy({ x: 0, y: 0 }, { width: 50, height: 50 }, "green", this.player);
+                    enemy.healthBar = new HealthBarElement(enemy.pos.x, enemy.pos.y, enemy.health, enemy.maxHealth);
+                    enemy.id = this.enemyIdCount;
+                    this.enemyIdCount++;
+                    this.enemies.push(enemy);
+                    this.gameUI.addUiElement("enemy_health_" + enemy.id, enemy.healthBar)
                     break;
             }
         }
@@ -59,50 +99,77 @@ class Game {
             }
         }
 
-        let click = (e)  => {
+        let click = (e) => {
             const rect = this.canvas.getBoundingClientRect()
             const x = e.clientX - rect.left
             const y = e.clientY - rect.top
             this.player.shoot(x, y);
-            this.menu.addUiElement("alert" + this.alertNumber, new AlertTextElement("shot!", this.player.pos.x + this.player.size.width / 2, this.player.pos.y + this.player.size.height / 2))
+            this.AlertUI.addUiElement("alert" + this.alertNumber, new AlertTextElement("shot!", this.player.pos.x + this.player.size.width / 2, this.player.pos.y + this.player.size.height / 2))
             this.alertNumber++;
             this.alertNumber %= 10;
         }
         document.addEventListener("keydown", keyDown.bind(this));
-    
+
         document.addEventListener("keyup", keyUp.bind(this));
 
         this.canvas.addEventListener("click", click.bind(this));
-    
+
     }
 
     update(dt) {
         this.player.update(dt);
-        if(this.player.getProjectiles().projectiles.length > 0) {
-            for(let i = 0; i < this.player.getProjectiles().projectiles.length; i++) 
+        if (this.player.getProjectiles().projectiles.length > 0) {
+            for (let i = 0; i < this.player.getProjectiles().projectiles.length; i++)
                 this.player.getProjectiles().projectiles[i].update(dt);
         }
 
-        this.menu.update(dt);
+        for (let i = this.enemies.length - 1; i >= 0; i--) {
+            this.enemies[i].update(dt);
+            if (this.enemies[i].shouldDelete) {
+                this.score++;
+                this.gameUI.getElement("score").updateText("score: " + this.score);
+                this.player.health += 10;
+                this.player.health = Math.min(this.player.health, this.player.maxHealth);
+                this.gameUI.deleteElement("enemy_health_" + this.enemies[i].id)
+                this.enemies.splice(i, 1);
+                continue;
+            }
+            let damage = CollisionHandler.checkProjectileCollision(this.enemies[i], this.player.getProjectiles().projectiles);
+            if (damage) {
+                this.AlertUI.addUiElement("enemy_hit_" + this.enemies[i].id, new AlertTextElement(damage, this.enemies[i].pos.x + this.enemies[i].size.width / 2, this.enemies[i].pos.y + this.enemies[i].size.height / 2, 0.075, "Arial", "red"))
+            }
+            CollisionHandler.checkPlayerEnemyCollision(this.player, this.enemies[i]);
+        }
+
+
+
+        this.AlertUI.update(dt);
+        this.gameUI.update(dt);
     }
 
     render() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.ctx.fillStyle = "RED";
+        this.ctx.fillStyle = "black";
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.player.render(this.ctx);
-        if(this.player.getProjectiles().projectiles.length > 0) {
-            for(let i = 0; i < this.player.getProjectiles().projectiles.length; i++) 
+
+        for (let i = 0; i < this.enemies.length; i++) {
+            this.enemies[i].render(this.ctx);
+        }
+
+        if (this.player.getProjectiles().projectiles.length > 0) {
+            for (let i = 0; i < this.player.getProjectiles().projectiles.length; i++)
                 this.player.getProjectiles().projectiles[i].render(this.ctx);
         }
 
-        this.menu.render(this.ctx);
+        this.AlertUI.render(this.ctx);
+        this.gameUI.render(this.ctx);
     }
 
     gameLoop(currentTime) {
         let deltaTime = currentTime - this.lastTime;
         this.lastTime = currentTime;
-        
+
         this.update(deltaTime);
         this.render();
         requestAnimationFrame(this.gameLoop.bind(this));

@@ -2,7 +2,7 @@ import TextElement from "./TextElement.js";
 
 export default class AlertTextElement extends TextElement {
 
-  constructor(text, x, y, speed = 0.05, font = 'Arial', color = 'black', size = 20, align = 'left', ) {
+  constructor(text, x, y, speed = 0.05, font = 'Arial', color = 'white', size = 20, align = 'left', ) {
     super(text, x, y, font, color, size = 20, align);
     this.alpha = 1;
     this.fadeDuration = 120; // frames

@@ -9,6 +9,7 @@ export default class Projectile {
         this.vel = { x: 0, y: 0 };
         this.speed = 0.3;
         this.maxDistance = 300;
+        this.damage = 20;
         
 
         const deltaX = this.target.x - this.initPos.x;
@@ -73,7 +74,7 @@ export default class Projectile {
         ctx.rotate(this.rotation * Math.PI / 180);
         ctx.translate(-center.x, -center.y);
 
-        ctx.fillStyle = "black";
+        ctx.fillStyle = "PapayaWhip";
         ctx.fillRect(this.pos.x, this.pos.y, this.size.width, this.size.height);
     
         ctx.translate(center.x, center.y);
