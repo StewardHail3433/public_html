@@ -7,7 +7,7 @@ export default class Enemy extends Entity {
         this.target = target;
         this.speed = 0.1;
         this.id = null;
-        this.damage = 10;
+        this.damage = 30;
     }
 
     update(dt) {
